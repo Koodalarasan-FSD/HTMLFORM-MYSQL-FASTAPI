@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Template Rendering Example</title>
+</head>
+<body>
+    <h2>Submit Form</h2>
+    <form id="submit-form" action="/submit-form/" method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name"><br>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    
+    <h2>Users List</h2>
+    <div id="users">
+        {% for user in users %}
+            <p>{{ user.id }}: {{ user.name }} ({{ user.email }})</p>
+        {% endfor %}
+    </div>
+
+    <h2>Update User</h2>
+    <form id="update-form">
+        <label for="user-id">Select User ID:</label><br>
+        <input type="number" id="user-id" name="user-id" min="1"><br>
+        <label for="new-name">New Name:</label><br>
+        <input type="text" id="new-name" name="new-name"><br>
+        <label for="new-email">New Email:</label><br>
+        <input type="text" id="new-email" name="new-email"><br><br>
+        <input type="button" value="Update" onclick="updateUser()">
+    </form>
+    
+    <script>
+        // Function to update a user
+        async function updateUser() {
+            const userId = document.getElementById('user-id').value;
+            const newName = document.getElementById('new-name').value;
+            const newEmail = document.getElementById('new-email').value;
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newName, email: newEmail })
+            });
+            if (response.ok) {
+                alert('User updated successfully');
+                fetchUsers();
+            } else {
+                alert('Error updating user');
+            }
+        }
+
+        // Function to fetch and display users
+        async function fetchUsers() {
+            const response = await fetch('/api/users/');
+            const users = await response.json();
+            const usersDiv = document.getElementById('users');
+            usersDiv.innerHTML = users.map(user => `<p>${user.id}: ${user.name} (${user.email})</p>`).join('');
+        }
+
+        // Fetch users when the page loads
+        window.onload = fetchUsers;
+    </script>
+</body>
+</html>
